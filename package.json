@@ -1,8 +1,8 @@
 {
-  "name": "craco-less",
-  "version": "1.20.0",
+  "name": "craco-plugin-less",
+  "version": "1.0.0",
   "description": "A Less plugin for craco / react-scripts / create-react-app",
-  "main": "lib/craco-less.js",
+  "main": "lib/less-plugin.js",
   "scripts": {
     "test": "jest --coverage",
     "lint": "eslint --fix \"**/*.{js,ts}\"",
@@ -11,21 +11,22 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/DocSpring/craco-less.git"
+    "url": "https://github.com/fanck0605/craco-plugin-less.git"
   },
   "keywords": [
     "craco",
-    "create-react-app"
+    "create-react-app",
+    "cra"
   ],
   "author": "Nathan Broadbent",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/DocSpring/craco-less/issues"
+    "url": "https://github.com/fanck0605/craco-plugin-less/issues"
   },
   "files": [
     "lib"
   ],
-  "homepage": "https://github.com/DocSpring/craco-less#readme",
+  "homepage": "https://github.com/fanck0605/craco-plugin-less#readme",
   "devDependencies": {
     "@craco/craco": "^6.4.3",
     "eslint": "^8.5.0",

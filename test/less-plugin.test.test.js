@@ -1,7 +1,7 @@
 const { createJestConfig } = require("@craco/craco");
 const { processCracoConfig } = require("@craco/craco/lib/config");
 const { applyJestConfigPlugins } = require("@craco/craco/lib/features/plugins");
-const CracoLessPlugin = require("../lib/craco-less");
+const lessPlugin = require("../lib/less-plugin");
 const { getCracoContext } = require("./test-utils");
 const { cloneDeep } = require("lodash");
 
@@ -45,7 +45,7 @@ test("the jest config is modified correctly", () => {
   contexts.forEach(({ jestConfig, overrideJestConfig }) => {
     jestConfig = overrideJestConfig(
       {
-        plugins: [{ plugin: CracoLessPlugin }],
+        plugins: [{ plugin: lessPlugin }],
       },
       jestConfig
     );
@@ -70,7 +70,7 @@ test("throws an error when we can't find CSS Modules pattern under moduleNameMap
     const runTest = () => {
       overrideJestConfig(
         {
-          plugins: [{ plugin: CracoLessPlugin }],
+          plugins: [{ plugin: lessPlugin }],
         },
         jestConfig
       );
@@ -92,7 +92,7 @@ test("throws an error when we can't find CSS Modules pattern under transformIgno
     const runTest = () => {
       overrideJestConfig(
         {
-          plugins: [{ plugin: CracoLessPlugin }],
+          plugins: [{ plugin: lessPlugin }],
         },
         jestConfig
       );

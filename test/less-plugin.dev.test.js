@@ -1,5 +1,5 @@
 const path = require("path");
-const CracoLessPlugin = require("../lib/craco-less");
+const lessPlugin = require("../lib/less-plugin");
 const {
   applyWebpackConfigPlugins,
 } = require("@craco/craco/lib/features/plugins");
@@ -64,7 +64,7 @@ test("the webpack config is modified correctly without any options", () => {
     }) => {
       webpackConfig = overrideWebpackConfig(
         {
-          plugins: [{ plugin: CracoLessPlugin }],
+          plugins: [{ plugin: lessPlugin }],
         },
         webpackConfig
       );
@@ -157,7 +157,7 @@ test("the webpack config is modified correctly with less-loader options", () => 
         {
           plugins: [
             {
-              plugin: CracoLessPlugin,
+              plugin: lessPlugin,
               options: {
                 lessLoaderOptions: {
                   lessOptions: {
@@ -293,7 +293,7 @@ test("the webpack config is modified correctly with all loader options", () => {
         {
           plugins: [
             {
-              plugin: CracoLessPlugin,
+              plugin: lessPlugin,
               options: {
                 lessLoaderOptions: {
                   lessOptions: {
@@ -430,7 +430,7 @@ test("the webpack config is modified correctly with the modifyLessRule option", 
         {
           plugins: [
             {
-              plugin: CracoLessPlugin,
+              plugin: lessPlugin,
               options: {
                 modifyLessRule: (rule, context) => {
                   if (context.env === "production") {
@@ -537,7 +537,7 @@ test("the webpack config is modified correctly with the modifyLessModuleRule opt
         {
           plugins: [
             {
-              plugin: CracoLessPlugin,
+              plugin: lessPlugin,
               options: {
                 modifyLessModuleRule: (rule, context) => {
                   if (context.env === "production") {
@@ -655,7 +655,7 @@ test('throws an error when we can\'t find "file" loader in the webpack config', 
     const runTest = () => {
       webpackConfig = overrideWebpackConfig(
         {
-          plugins: [{ plugin: CracoLessPlugin }],
+          plugins: [{ plugin: lessPlugin }],
         },
         webpackConfig
       );
@@ -676,7 +676,7 @@ test("throws an error when we can't find the oneOf rules in the webpack config",
     const runTest = () => {
       webpackConfig = overrideWebpackConfig(
         {
-          plugins: [{ plugin: CracoLessPlugin }],
+          plugins: [{ plugin: lessPlugin }],
         },
         webpackConfig
       );
@@ -705,7 +705,7 @@ test("throws an error when react-scripts adds an unknown webpack rule", () => {
     const runTest = () => {
       webpackConfig = overrideWebpackConfig(
         {
-          plugins: [{ plugin: CracoLessPlugin }],
+          plugins: [{ plugin: lessPlugin }],
         },
         webpackConfig
       );
@@ -728,7 +728,7 @@ test("throws an error when the sass rule is missing", () => {
     const runTest = () => {
       webpackConfig = overrideWebpackConfig(
         {
-          plugins: [{ plugin: CracoLessPlugin }],
+          plugins: [{ plugin: lessPlugin }],
         },
         webpackConfig
       );
@@ -750,7 +750,7 @@ test("throws an error when the sass module rule is missing", () => {
     const runTest = () => {
       webpackConfig = overrideWebpackConfig(
         {
-          plugins: [{ plugin: CracoLessPlugin }],
+          plugins: [{ plugin: lessPlugin }],
         },
         webpackConfig
       );

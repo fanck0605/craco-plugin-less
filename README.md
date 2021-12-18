@@ -1,5 +1,5 @@
-[![Test Status](https://github.com/DocSpring/craco-less/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/DocSpring/craco-less/actions/workflows/test.yml)
-[![Coverage Status](https://coveralls.io/repos/github/DocSpring/craco-less/badge.svg?branch=master)](https://coveralls.io/github/DocSpring/craco-less?branch=master)
+[![Test Status](https://github.com/fanck0605/craco-plugin-less/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/fanck0605/craco-plugin-less/actions/workflows/test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/fanck0605/craco-plugin-less/badge.svg?branch=master)](https://coveralls.io/github/fanck0605/craco-plugin-less?branch=master)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
@@ -56,7 +56,7 @@ you should use the [`craco-antd`](https://github.com/DocSpring/craco-antd) plugi
 
 ## Supported Versions
 
-`craco-less` is tested with:
+`craco-plugin-less` is tested with:
 
 - `react-scripts`: `^4.0.3 || ^5.0.0`
 - `@craco/craco`: `^6.4.3`
@@ -65,14 +65,14 @@ you should use the [`craco-antd`](https://github.com/DocSpring/craco-antd) plugi
 
 First, follow the [`craco` Installation Instructions](https://github.com/gsoft-inc/craco/blob/master/packages/craco/README.md#installation) to install the `craco` package, create a `craco.config.js` file, and modify the scripts in your `package.json`.
 
-Then install `craco-less`:
+Then install `craco-plugin-less`:
 
 ```bash
-$ yarn add craco-less
+$ yarn add craco-plugin-less
 
 # OR
 
-$ npm i -S craco-less
+$ npm i -S craco-plugin-less
 ```
 
 ## Usage
@@ -80,10 +80,10 @@ $ npm i -S craco-less
 Here is a complete `craco.config.js` configuration file that adds Less compilation to `create-react-app`:
 
 ```js
-const CracoLessPlugin = require("craco-less");
+const lessPlugin = require("craco-plugin-less");
 
 module.exports = {
-  plugins: [{ plugin: CracoLessPlugin }],
+  plugins: [{ plugin: lessPlugin }],
 };
 ```
 
@@ -130,12 +130,12 @@ You can pass an `options` object to configure the loaders and plugins(configure 
 For example, to configure `less-loader`:
 
 ```js
-const CracoLessPlugin = require("craco-less");
+const lessPlugin = require("craco-plugin-less");
 
 module.exports = {
   plugins: [
     {
-      plugin: CracoLessPlugin,
+      plugin: lessPlugin,
       options: {
         lessLoaderOptions: {
           lessOptions: {
@@ -171,13 +171,13 @@ You can use `modifyLessModuleRule` to configure the file suffix and loaders ([cs
 For example:
 
 ```js
-const CracoLessPlugin = require("craco-less");
+const lessPlugin = require("craco-plugin-less");
 const { loaderByName } = require("@craco/craco");
 
 module.exports = {
   plugins: [
     {
-      plugin: CracoLessPlugin,
+      plugin: lessPlugin,
       options: {
         modifyLessRule(lessRule, context) {
           // You have to exclude these file suffixes first,
@@ -212,7 +212,7 @@ There is a known problem with Less and [CSS modules](https://github.com/css-modu
 ## Further Configuration
 
 If you need to configure anything else for the webpack build, take a look at the
-[Configuration Overview section in the `craco` README](https://github.com/sharegate/craco/blob/master/packages/craco/README.md#configuration-overview). You can use `CracoLessPlugin` while making other changes to `babel` and `webpack`, etc.
+[Configuration Overview section in the `craco` README](https://github.com/gsoft-inc/craco/blob/master/packages/craco/README.md#configuration). You can use `lessPlugin` while making other changes to `babel` and `webpack`, etc.
 
 ## Contributing
 
@@ -265,6 +265,7 @@ Before submitting a pull request, please check the following:
 ## Contributors
 
 - [ndbroadbent](https://github.com/ndbroadbent)
+- [fanck0605](https://github.com/fanck0605)
 - [tux-tn](https://github.com/tux-tn)
 - [alexandrtovmach](https://github.com/alexandrtovmach)
 - [cemremengu](https://github.com/cemremengu)
@@ -275,4 +276,3 @@ Before submitting a pull request, please check the following:
 - [nutgaard](https://github.com/nutgaard)
 - [alexander-svendsen](https://github.com/alexander-svendsen)
 - [sgtsquiggs](https://github.com/sgtsquiggs)
-- [fanck0605](https://github.com/fanck0605)

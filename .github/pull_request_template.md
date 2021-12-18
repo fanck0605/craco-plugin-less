@@ -1,4 +1,4 @@
-Thanks for helping to maintain `craco-less`!
+Thanks for helping to maintain `craco-plugin-less`!
 
 Before you submit this PR, please check the following:
 
