@@ -1,5 +1,5 @@
-[![Test Status](https://github.com/fanck0605/craco-plugin-less/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/fanck0605/craco-plugin-less/actions/workflows/test.yml)
-[![Coverage Status](https://coveralls.io/repos/github/fanck0605/craco-plugin-less/badge.svg?branch=master)](https://coveralls.io/github/fanck0605/craco-plugin-less?branch=master)
+[![Test Status](https://github.com/fanck0605/craco-plugin-less/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/fanck0605/craco-plugin-less/actions/workflows/test.yml)
+[![Coverage Status](https://coveralls.io/repos/github/fanck0605/craco-plugin-less/badge.svg?branch=main)](https://coveralls.io/github/fanck0605/craco-plugin-less?branch=main)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ---
