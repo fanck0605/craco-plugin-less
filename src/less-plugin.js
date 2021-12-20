@@ -6,22 +6,49 @@ import { cloneDeep } from "lodash";
 const lessRegex = /\.less$/;
 const lessModuleRegex = /\.module\.less$/;
 
-const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
-  pluginOptions = pluginOptions || {};
+const overrideWebpackConfig = ({
+  context,
+  webpackConfig,
+
+  pluginOptions: {
+    styleLoaderOptions,
+    miniCssExtractPluginOptions,
+    cssLoaderOptions,
+    postcssLoaderOptions,
+    resolveUrlLoaderOptions,
+    lessLoaderOptions,
+
+    modifyLessRule,
+    modifyLessModuleRule,
+  } = {},
+}) => {
+  const isEnvDevelopment = context.env === "development";
+  const isEnvProduction = context.env === "production";
 
   const createLessRule = ({ baseRule, overrideRule }) => {
     baseRule = cloneDeep(baseRule);
 
     const loaders = baseRule.use.map(toLoaderRule).map((rule) => {
       if (
-        (context.env === "development" || context.env === "test") &&
+        isEnvDevelopment &&
         rule.loader.includes(`${pathSep}style-loader${pathSep}`)
       ) {
         return {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...pluginOptions.styleLoaderOptions,
+            ...styleLoaderOptions,
+          },
+        };
+      } else if (
+        isEnvProduction &&
+        rule.loader.includes(`${pathSep}mini-css-extract-plugin${pathSep}`)
+      ) {
+        return {
+          loader: rule.loader,
+          options: {
+            ...rule.options,
+            ...miniCssExtractPluginOptions,
           },
         };
       } else if (rule.loader.includes(`${pathSep}css-loader${pathSep}`)) {
@@ -29,7 +56,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...pluginOptions.cssLoaderOptions,
+            ...cssLoaderOptions,
           },
         };
       } else if (rule.loader.includes(`${pathSep}postcss-loader${pathSep}`)) {
@@ -37,7 +64,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...pluginOptions.postcssLoaderOptions,
+            ...postcssLoaderOptions,
           },
         };
       } else if (
@@ -47,18 +74,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...pluginOptions.resolveUrlLoaderOptions,
-          },
-        };
-      } else if (
-        context.env === "production" &&
-        rule.loader.includes(`${pathSep}mini-css-extract-plugin${pathSep}`)
-      ) {
-        return {
-          loader: rule.loader,
-          options: {
-            ...rule.options,
-            ...pluginOptions.miniCssExtractPluginOptions,
+            ...resolveUrlLoaderOptions,
           },
         };
       } else if (rule.loader.includes(`${pathSep}sass-loader${pathSep}`)) {
@@ -66,7 +82,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: require.resolve("less-loader"),
           options: {
             ...rule.options,
-            ...pluginOptions.lessLoaderOptions,
+            ...lessLoaderOptions,
           },
         };
       } else {
@@ -109,8 +125,8 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
     },
   });
 
-  if (pluginOptions.modifyLessRule) {
-    lessRule = pluginOptions.modifyLessRule(lessRule, context);
+  if (modifyLessRule) {
+    lessRule = modifyLessRule(lessRule, context);
   }
 
   const sassModuleRule = oneOfRule.oneOf.find(
@@ -130,11 +146,8 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
     },
   });
 
-  if (pluginOptions.modifyLessModuleRule) {
-    lessModuleRule = pluginOptions.modifyLessModuleRule(
-      lessModuleRule,
-      context
-    );
+  if (modifyLessModuleRule) {
+    lessModuleRule = modifyLessModuleRule(lessModuleRule, context);
   }
 
   // insert less loader before "file" loader
