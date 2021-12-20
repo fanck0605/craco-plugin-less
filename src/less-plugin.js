@@ -20,6 +20,8 @@ const overrideWebpackConfig = ({
 
     modifyLessRule,
     modifyLessModuleRule,
+
+    unknownLoader = "error",
   } = {},
 }) => {
   const isEnvDevelopment = context.env === "development";
@@ -28,70 +30,80 @@ const overrideWebpackConfig = ({
   const createLessRule = ({ baseRule, overrideRule }) => {
     baseRule = cloneDeep(baseRule);
 
-    const loaders = baseRule.use.map(toLoaderRule).map((rule) => {
-      if (
-        isEnvDevelopment &&
-        rule.loader.includes(`${pathSep}style-loader${pathSep}`)
-      ) {
-        return {
-          loader: rule.loader,
-          options: {
-            ...rule.options,
-            ...styleLoaderOptions,
-          },
-        };
-      } else if (
-        isEnvProduction &&
-        rule.loader.includes(`${pathSep}mini-css-extract-plugin${pathSep}`)
-      ) {
-        return {
-          loader: rule.loader,
-          options: {
-            ...rule.options,
-            ...miniCssExtractPluginOptions,
-          },
-        };
-      } else if (rule.loader.includes(`${pathSep}css-loader${pathSep}`)) {
-        return {
-          loader: rule.loader,
-          options: {
-            ...rule.options,
-            ...cssLoaderOptions,
-          },
-        };
-      } else if (rule.loader.includes(`${pathSep}postcss-loader${pathSep}`)) {
-        return {
-          loader: rule.loader,
-          options: {
-            ...rule.options,
-            ...postcssLoaderOptions,
-          },
-        };
-      } else if (
-        rule.loader.includes(`${pathSep}resolve-url-loader${pathSep}`)
-      ) {
-        return {
-          loader: rule.loader,
-          options: {
-            ...rule.options,
-            ...resolveUrlLoaderOptions,
-          },
-        };
-      } else if (rule.loader.includes(`${pathSep}sass-loader${pathSep}`)) {
-        return {
-          loader: require.resolve("less-loader"),
-          options: {
-            ...rule.options,
-            ...lessLoaderOptions,
-          },
-        };
-      } else {
-        throwError(
-          `Found an unhandled loader in the ${context.env} webpack config: ${rule.loader}`,
-          "webpack+unknown+rule"
-        );
-      }
-    });
+    const loaders = baseRule.use
+      .map(toLoaderRule)
+      .map((rule) => {
+        if (
+          isEnvDevelopment &&
+          rule.loader.includes(`${pathSep}style-loader${pathSep}`)
+        ) {
+          return {
+            loader: rule.loader,
+            options: {
+              ...rule.options,
+              ...styleLoaderOptions,
+            },
+          };
+        } else if (
+          isEnvProduction &&
+          rule.loader.includes(`${pathSep}mini-css-extract-plugin${pathSep}`)
+        ) {
+          return {
+            loader: rule.loader,
+            options: {
+              ...rule.options,
+              ...miniCssExtractPluginOptions,
+            },
+          };
+        } else if (rule.loader.includes(`${pathSep}css-loader${pathSep}`)) {
+          return {
+            loader: rule.loader,
+            options: {
+              ...rule.options,
+              ...cssLoaderOptions,
+            },
+          };
+        } else if (rule.loader.includes(`${pathSep}postcss-loader${pathSep}`)) {
+          return {
+            loader: rule.loader,
+            options: {
+              ...rule.options,
+              ...postcssLoaderOptions,
+            },
+          };
+        } else if (
+          rule.loader.includes(`${pathSep}resolve-url-loader${pathSep}`)
+        ) {
+          return {
+            loader: rule.loader,
+            options: {
+              ...rule.options,
+              ...resolveUrlLoaderOptions,
+            },
+          };
+        } else if (rule.loader.includes(`${pathSep}sass-loader${pathSep}`)) {
+          return {
+            loader: require.resolve("less-loader"),
+            options: {
+              ...rule.options,
+              ...lessLoaderOptions,
+            },
+          };
+        } else {
+          switch (unknownLoader) {
+            case "accept":
+              return rule;
+            case "ignore":
+              return null;
+            case "error":
+              throwError(
+                `Found an unhandled loader in the ${context.env} webpack config: ${rule.loader}`,
+                "webpack+unknown+rule"
+              );
+          }
+        }
+      })
+      .filter(Boolean);
 
     return {
       ...baseRule,

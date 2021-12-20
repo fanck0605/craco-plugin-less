@@ -1,11 +1,12 @@
-import * as path from "path";
 import lessPlugin from "../src/less-plugin";
 import { applyWebpackConfigPlugins } from "@craco/craco/lib/features/plugins";
 import { styleRuleByName } from "../src/utils";
 import {
+  addUnknownLoader,
   getCracoContext,
   obtainSassModuleRule,
   obtainSassRule,
+  unknownLoader,
 } from "./test-utils";
 import { createWebpackDevConfig } from "@craco/craco";
 import { processCracoConfig } from "@craco/craco/lib/config";
@@ -643,6 +644,220 @@ test("the webpack config is modified correctly with the modifyLessModuleRule opt
   );
 });
 
+test("the webpack config is modified correctly when less plugin accept an unknown loader", () => {
+  contexts.forEach(
+    ({
+      webpackConfig,
+      originalSassRule,
+      originalSassModuleRule,
+      overrideWebpackConfig,
+    }) => {
+      addUnknownLoader(webpackConfig);
+
+      webpackConfig = overrideWebpackConfig(
+        {
+          plugins: [
+            {
+              plugin: lessPlugin,
+              options: {
+                unknownLoader: "accept",
+              },
+            },
+          ],
+        },
+        webpackConfig
+      );
+
+      const oneOfRule = webpackConfig.module.rules.find((r) => r.oneOf);
+      expect(oneOfRule).not.toBeUndefined();
+
+      const lessRule = oneOfRule.oneOf.find(
+        ({ test }) => test && test.toString() === "/\\.less$/"
+      );
+      expect(lessRule).not.toBeUndefined();
+
+      expect(lessRule.use[0]).toEqual({
+        loader: originalSassRule.use[0],
+        options: {},
+      });
+      expect(lessRule.use[1]).toEqual({
+        loader: originalSassRule.use[1].loader,
+        options: {
+          ...originalSassRule.use[1].options,
+        },
+      });
+      expect(lessRule.use[2]).toEqual({
+        loader: originalSassRule.use[2].loader,
+        options: {
+          ...originalSassRule.use[2].options,
+        },
+      });
+      expect(lessRule.use[3]).toEqual({
+        loader: originalSassRule.use[3].loader,
+        options: {
+          ...originalSassRule.use[3].options,
+        },
+      });
+
+      expect(lessRule.use[4]).toEqual({
+        loader: require.resolve("less-loader"),
+        options: {
+          sourceMap: true,
+        },
+      });
+
+      expect(lessRule.use[5]).toEqual({
+        loader: unknownLoader,
+        options: {},
+      });
+
+      const lessModuleRule = oneOfRule.oneOf.find(
+        ({ test }) => test && test.toString() === "/\\.module\\.less$/"
+      );
+      expect(lessModuleRule).not.toBeUndefined();
+
+      expect(lessModuleRule.use[0]).toEqual({
+        loader: originalSassModuleRule.use[0],
+        options: {},
+      });
+      expect(lessModuleRule.use[1]).toEqual({
+        loader: originalSassModuleRule.use[1].loader,
+        options: {
+          ...originalSassModuleRule.use[1].options,
+        },
+      });
+      expect(lessModuleRule.use[2]).toEqual({
+        loader: originalSassModuleRule.use[2].loader,
+        options: {
+          ...originalSassModuleRule.use[2].options,
+        },
+      });
+      expect(lessModuleRule.use[3]).toEqual({
+        loader: originalSassModuleRule.use[3].loader,
+        options: {
+          ...originalSassModuleRule.use[3].options,
+        },
+      });
+
+      expect(lessModuleRule.use[4]).toEqual({
+        loader: require.resolve("less-loader"),
+        options: {
+          sourceMap: true,
+        },
+      });
+
+      expect(lessModuleRule.use[5]).toEqual({
+        loader: unknownLoader,
+        options: {},
+      });
+    }
+  );
+});
+
+test("the webpack config is modified correctly when less plugin ignore an unknown loader", () => {
+  contexts.forEach(
+    ({
+      webpackConfig,
+      originalSassRule,
+      originalSassModuleRule,
+      overrideWebpackConfig,
+    }) => {
+      addUnknownLoader(webpackConfig);
+
+      webpackConfig = overrideWebpackConfig(
+        {
+          plugins: [
+            {
+              plugin: lessPlugin,
+              options: {
+                unknownLoader: "ignore",
+              },
+            },
+          ],
+        },
+        webpackConfig
+      );
+
+      const oneOfRule = webpackConfig.module.rules.find((r) => r.oneOf);
+      expect(oneOfRule).not.toBeUndefined();
+
+      const lessRule = oneOfRule.oneOf.find(
+        ({ test }) => test && test.toString() === "/\\.less$/"
+      );
+      expect(lessRule).not.toBeUndefined();
+
+      expect(lessRule.use[0]).toEqual({
+        loader: originalSassRule.use[0],
+        options: {},
+      });
+      expect(lessRule.use[1]).toEqual({
+        loader: originalSassRule.use[1].loader,
+        options: {
+          ...originalSassRule.use[1].options,
+        },
+      });
+      expect(lessRule.use[2]).toEqual({
+        loader: originalSassRule.use[2].loader,
+        options: {
+          ...originalSassRule.use[2].options,
+        },
+      });
+      expect(lessRule.use[3]).toEqual({
+        loader: originalSassRule.use[3].loader,
+        options: {
+          ...originalSassRule.use[3].options,
+        },
+      });
+
+      expect(lessRule.use[4]).toEqual({
+        loader: require.resolve("less-loader"),
+        options: {
+          sourceMap: true,
+        },
+      });
+
+      expect(lessRule.use[5]).toBeUndefined();
+
+      const lessModuleRule = oneOfRule.oneOf.find(
+        ({ test }) => test && test.toString() === "/\\.module\\.less$/"
+      );
+      expect(lessModuleRule).not.toBeUndefined();
+
+      expect(lessModuleRule.use[0]).toEqual({
+        loader: originalSassModuleRule.use[0],
+        options: {},
+      });
+      expect(lessModuleRule.use[1]).toEqual({
+        loader: originalSassModuleRule.use[1].loader,
+        options: {
+          ...originalSassModuleRule.use[1].options,
+        },
+      });
+      expect(lessModuleRule.use[2]).toEqual({
+        loader: originalSassModuleRule.use[2].loader,
+        options: {
+          ...originalSassModuleRule.use[2].options,
+        },
+      });
+      expect(lessModuleRule.use[3]).toEqual({
+        loader: originalSassModuleRule.use[3].loader,
+        options: {
+          ...originalSassModuleRule.use[3].options,
+        },
+      });
+
+      expect(lessModuleRule.use[4]).toEqual({
+        loader: require.resolve("less-loader"),
+        options: {
+          sourceMap: true,
+        },
+      });
+
+      expect(lessModuleRule.use[5]).toBeUndefined();
+    }
+  );
+});
+
 test('throws an error when we can\'t find "file" loader in the webpack config', () => {
   contexts.forEach(({ webpackConfig, overrideWebpackConfig }) => {
     let oneOfRule = webpackConfig.module.rules.find((r) => r.oneOf);
@@ -688,18 +903,8 @@ test("throws an error when we can't find the oneOf rules in the webpack config",
 
 test("throws an error when react-scripts adds an unknown webpack rule", () => {
   contexts.forEach(({ webpackConfig, overrideWebpackConfig }) => {
-    const unknownLoader = path.join(
-      path.sep,
-      "path",
-      "to",
-      "unknown-loader",
-      "index.js"
-    );
-    let oneOfRule = webpackConfig.module.rules.find((r) => r.oneOf);
-    const sassRule = oneOfRule.oneOf.find(styleRuleByName("scss|sass", false));
-    sassRule.use.push({
-      loader: unknownLoader,
-    });
+    addUnknownLoader(webpackConfig);
+
     const runTest = () => {
       webpackConfig = overrideWebpackConfig(
         {
@@ -708,6 +913,7 @@ test("throws an error when react-scripts adds an unknown webpack rule", () => {
         webpackConfig
       );
     };
+
     expect(runTest).toThrowError(
       new RegExp(
         "^Found an unhandled loader in the development webpack config: " +
