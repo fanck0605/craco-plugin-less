@@ -1,22 +1,3 @@
-const mapValues = (object, callback) => {
-  const O = {};
-  for (let key in object) {
-    O[key] = callback(object[key]);
-  }
-  return O;
-};
-
-const deepClone = (value) => {
-  switch (value.constructor) {
-    case Array:
-      return value.map(deepClone);
-    case Object:
-      return mapValues(value, deepClone);
-    default:
-      return value;
-  }
-};
-
 const styleRuleByName = (name, module) => {
   return (rule) => {
     if (rule.test) {
@@ -34,7 +15,7 @@ const styleRuleByName = (name, module) => {
   };
 };
 
-const toStandardLoaderRule = (loaderNameOrRule) => {
+const toLoaderRule = (loaderNameOrRule) => {
   if (typeof loaderNameOrRule == "string") {
     return {
       loader: loaderNameOrRule,
@@ -45,9 +26,4 @@ const toStandardLoaderRule = (loaderNameOrRule) => {
   }
 };
 
-module.exports = {
-  mapValues,
-  deepClone,
-  styleRuleByName,
-  toStandardLoaderRule,
-};
+export { styleRuleByName, toLoaderRule };

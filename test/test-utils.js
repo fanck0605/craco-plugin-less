@@ -1,6 +1,6 @@
-const { processCracoConfig } = require("@craco/craco/lib/config");
-const { getCraPaths } = require("@craco/craco/lib/cra");
-const { styleRuleByName } = require("../lib/utils");
+import { processCracoConfig } from "@craco/craco/lib/config";
+import { getCraPaths } from "@craco/craco/lib/cra";
+import { styleRuleByName } from "../src/utils";
 
 const getCracoContext = (callerCracoConfig, env = process.env.NODE_ENV) => {
   const context = { env };
@@ -21,8 +21,4 @@ const obtainSassModuleRule = (webpackConfig) => {
     .oneOf.find(styleRuleByName("scss|sass", true));
 };
 
-module.exports = {
-  getCracoContext,
-  obtainSassRule,
-  obtainSassModuleRule,
-};
+export { getCracoContext, obtainSassRule, obtainSassModuleRule };

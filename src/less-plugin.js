@@ -1,11 +1,10 @@
-const path = require("path");
-const { deepClone, styleRuleByName, toStandardLoaderRule } = require("./utils");
-const { loaderByName, throwUnexpectedConfigError } = require("@craco/craco");
+import { sep as pathSep } from "path";
+import { styleRuleByName, toLoaderRule } from "./utils";
+import { loaderByName, throwUnexpectedConfigError } from "@craco/craco";
+import { cloneDeep } from "lodash";
 
 const lessRegex = /\.less$/;
 const lessModuleRegex = /\.module\.less$/;
-
-const pathSep = path.sep;
 
 const throwError = (message, githubIssueQuery) =>
   throwUnexpectedConfigError({
@@ -19,7 +18,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
   pluginOptions = pluginOptions || {};
 
   const createLessRule = ({ baseRule, overrideRule }) => {
-    baseRule = deepClone(baseRule);
+    baseRule = cloneDeep(baseRule);
     let lessRule = {
       ...baseRule,
       ...overrideRule,
@@ -27,7 +26,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
     };
 
     const loaders = baseRule.use;
-    loaders.map(toStandardLoaderRule).forEach((rule) => {
+    loaders.map(toLoaderRule).forEach((rule) => {
       if (
         (context.env === "development" || context.env === "test") &&
         rule.loader.includes(`${pathSep}style-loader${pathSep}`)
@@ -36,7 +35,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...(pluginOptions.styleLoaderOptions || {}),
+            ...pluginOptions.styleLoaderOptions,
           },
         });
       } else if (rule.loader.includes(`${pathSep}css-loader${pathSep}`)) {
@@ -44,7 +43,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...(pluginOptions.cssLoaderOptions || {}),
+            ...pluginOptions.cssLoaderOptions,
           },
         });
       } else if (rule.loader.includes(`${pathSep}postcss-loader${pathSep}`)) {
@@ -52,7 +51,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...(pluginOptions.postcssLoaderOptions || {}),
+            ...pluginOptions.postcssLoaderOptions,
           },
         });
       } else if (
@@ -62,7 +61,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...(pluginOptions.resolveUrlLoaderOptions || {}),
+            ...pluginOptions.resolveUrlLoaderOptions,
           },
         });
       } else if (
@@ -73,7 +72,7 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
           loader: rule.loader,
           options: {
             ...rule.options,
-            ...(pluginOptions.miniCssExtractPluginOptions || {}),
+            ...pluginOptions.miniCssExtractPluginOptions,
           },
         });
       } else if (rule.loader.includes(`${pathSep}sass-loader${pathSep}`)) {
@@ -205,7 +204,4 @@ const overrideJestConfig = ({ context, jestConfig }) => {
   return jestConfig;
 };
 
-module.exports = {
-  overrideWebpackConfig,
-  overrideJestConfig,
-};
+export { overrideWebpackConfig, overrideJestConfig };

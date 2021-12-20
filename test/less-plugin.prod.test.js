@@ -1,17 +1,15 @@
-const path = require("path");
-const lessPlugin = require("../lib/less-plugin");
-const {
-  applyWebpackConfigPlugins,
-} = require("@craco/craco/lib/features/plugins");
-const { styleRuleByName } = require("../lib/utils");
-const {
+import * as path from "path";
+import * as lessPlugin from "../src/less-plugin";
+import { applyWebpackConfigPlugins } from "@craco/craco/lib/features/plugins";
+import { styleRuleByName } from "../src/utils";
+import {
   getCracoContext,
   obtainSassRule,
   obtainSassModuleRule,
-} = require("./test-utils");
-const { createWebpackProdConfig } = require("@craco/craco");
-const { processCracoConfig } = require("@craco/craco/lib/config");
-const { cloneDeep } = require("lodash");
+} from "./test-utils";
+import { createWebpackProdConfig } from "@craco/craco";
+import { processCracoConfig } from "@craco/craco/lib/config";
+import { cloneDeep } from "lodash";
 
 process.env.NODE_ENV = "production";
 

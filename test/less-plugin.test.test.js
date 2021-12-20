@@ -1,9 +1,9 @@
-const { createJestConfig } = require("@craco/craco");
-const { processCracoConfig } = require("@craco/craco/lib/config");
-const { applyJestConfigPlugins } = require("@craco/craco/lib/features/plugins");
-const lessPlugin = require("../lib/less-plugin");
-const { getCracoContext } = require("./test-utils");
-const { cloneDeep } = require("lodash");
+import { createJestConfig } from "@craco/craco";
+import { processCracoConfig } from "@craco/craco/lib/config";
+import { applyJestConfigPlugins } from "@craco/craco/lib/features/plugins";
+import * as lessPlugin from "../src/less-plugin";
+import { getCracoContext } from "./test-utils";
+import { cloneDeep } from "lodash";
 
 process.env.NODE_ENV = "test";
 
