@@ -1,11 +1,11 @@
 import * as path from "path";
-import * as lessPlugin from "../src/less-plugin";
+import lessPlugin from "../src/less-plugin";
 import { applyWebpackConfigPlugins } from "@craco/craco/lib/features/plugins";
 import { styleRuleByName } from "../src/utils";
 import {
   getCracoContext,
-  obtainSassRule,
   obtainSassModuleRule,
+  obtainSassRule,
 } from "./test-utils";
 import { createWebpackProdConfig } from "@craco/craco";
 import { processCracoConfig } from "@craco/craco/lib/config";

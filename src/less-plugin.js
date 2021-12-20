@@ -1,88 +1,74 @@
 import { sep as pathSep } from "path";
-import { styleRuleByName, toLoaderRule } from "./utils";
-import { loaderByName, throwUnexpectedConfigError } from "@craco/craco";
+import { styleRuleByName, throwError, toLoaderRule } from "./utils";
+import { loaderByName } from "@craco/craco";
 import { cloneDeep } from "lodash";
 
 const lessRegex = /\.less$/;
 const lessModuleRegex = /\.module\.less$/;
-
-const throwError = (message, githubIssueQuery) =>
-  throwUnexpectedConfigError({
-    packageName: "craco-plugin-less",
-    githubRepo: "fanck0605/craco-plugin-less",
-    message,
-    githubIssueQuery,
-  });
 
 const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
   pluginOptions = pluginOptions || {};
 
   const createLessRule = ({ baseRule, overrideRule }) => {
     baseRule = cloneDeep(baseRule);
-    let lessRule = {
-      ...baseRule,
-      ...overrideRule,
-      use: [],
-    };
 
-    const loaders = baseRule.use;
-    loaders.map(toLoaderRule).forEach((rule) => {
+    const loaders = baseRule.use.map(toLoaderRule).map((rule) => {
       if (
         (context.env === "development" || context.env === "test") &&
         rule.loader.includes(`${pathSep}style-loader${pathSep}`)
       ) {
-        lessRule.use.push({
+        return {
           loader: rule.loader,
           options: {
             ...rule.options,
             ...pluginOptions.styleLoaderOptions,
           },
-        });
+        };
       } else if (rule.loader.includes(`${pathSep}css-loader${pathSep}`)) {
-        lessRule.use.push({
+        return {
           loader: rule.loader,
           options: {
             ...rule.options,
             ...pluginOptions.cssLoaderOptions,
           },
-        });
+        };
       } else if (rule.loader.includes(`${pathSep}postcss-loader${pathSep}`)) {
-        lessRule.use.push({
+        return {
           loader: rule.loader,
           options: {
             ...rule.options,
             ...pluginOptions.postcssLoaderOptions,
           },
-        });
+        };
       } else if (
         rule.loader.includes(`${pathSep}resolve-url-loader${pathSep}`)
       ) {
-        lessRule.use.push({
+        return {
           loader: rule.loader,
           options: {
             ...rule.options,
             ...pluginOptions.resolveUrlLoaderOptions,
           },
-        });
+        };
       } else if (
         context.env === "production" &&
         rule.loader.includes(`${pathSep}mini-css-extract-plugin${pathSep}`)
       ) {
-        lessRule.use.push({
+        return {
           loader: rule.loader,
           options: {
             ...rule.options,
             ...pluginOptions.miniCssExtractPluginOptions,
           },
-        });
+        };
       } else if (rule.loader.includes(`${pathSep}sass-loader${pathSep}`)) {
-        lessRule.use.push({
+        return {
           loader: require.resolve("less-loader"),
           options: {
             ...rule.options,
             ...pluginOptions.lessLoaderOptions,
           },
-        });
+        };
       } else {
         throwError(
           `Found an unhandled loader in the ${context.env} webpack config: ${rule.loader}`,
@@ -91,7 +77,11 @@ const overrideWebpackConfig = ({ context, webpackConfig, pluginOptions }) => {
       }
     });
 
-    return lessRule;
+    return {
+      ...baseRule,
+      ...overrideRule,
+      use: loaders,
+    };
   };
 
   const oneOfRule = webpackConfig.module.rules.find((rule) => rule.oneOf);
@@ -204,4 +194,4 @@ const overrideJestConfig = ({ context, jestConfig }) => {
   return jestConfig;
 };
 
-export { overrideWebpackConfig, overrideJestConfig };
+export default Object.freeze({ overrideWebpackConfig, overrideJestConfig });

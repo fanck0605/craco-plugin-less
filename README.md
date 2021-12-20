@@ -80,7 +80,7 @@ $ npm i -S craco-plugin-less
 Here is a complete `craco.config.js` configuration file that adds Less compilation to `create-react-app`:
 
 ```js
-const lessPlugin = require("craco-plugin-less");
+const { default: lessPlugin } = require("craco-plugin-less");
 
 module.exports = {
   plugins: [{ plugin: lessPlugin }],
@@ -130,7 +130,7 @@ You can pass an `options` object to configure the loaders and plugins(configure 
 For example, to configure `less-loader`:
 
 ```js
-const lessPlugin = require("craco-plugin-less");
+const { default: lessPlugin } = require("craco-plugin-less");
 
 module.exports = {
   plugins: [
@@ -171,7 +171,7 @@ You can use `modifyLessModuleRule` to configure the file suffix and loaders ([cs
 For example:
 
 ```js
-const lessPlugin = require("craco-plugin-less");
+const { default: lessPlugin } = require("craco-plugin-less");
 const { loaderByName } = require("@craco/craco");
 
 module.exports = {
