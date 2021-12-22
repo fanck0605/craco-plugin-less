@@ -75,15 +75,8 @@ function obtainOneOfRule(
       "webpack+rules+oneOf"
     );
   }
-  // automatic type conversion
-  if (isString(oneOfRule) || !oneOfRule.oneOf) {
-    throw Error("unreachable");
-  }
 
-  return {
-    ...oneOfRule,
-    oneOf: oneOfRule.oneOf,
-  };
+  return oneOfRule as OneOfRule;
 }
 
 function obtainSassRule(
