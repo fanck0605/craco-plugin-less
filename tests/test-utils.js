@@ -1,7 +1,13 @@
 import { processCracoConfig } from "@craco/craco/lib/config";
 import { getCraPaths } from "@craco/craco/lib/cra";
-import { styleRuleByName, toLoaderRule } from "../src/utils";
+import {
+  obtainOneOfRule,
+  obtainSassModuleRule,
+  obtainSassRule,
+  toLoaderRule,
+} from "../src/utils";
 import path from "path";
+import { projectRoot } from "@craco/craco/lib/paths";
 
 const getCracoContext = (callerCracoConfig, env = process.env.NODE_ENV) => {
   const context = { env };
@@ -10,16 +16,20 @@ const getCracoContext = (callerCracoConfig, env = process.env.NODE_ENV) => {
   return context;
 };
 
-const obtainSassRule = (webpackConfig) => {
-  return webpackConfig.module.rules
-    .find((rule) => rule.oneOf)
-    .oneOf.find(styleRuleByName("scss|sass", false));
-};
+const getCracoWebpackContext = getCracoContext;
 
-const obtainSassModuleRule = (webpackConfig) => {
-  return webpackConfig.module.rules
-    .find((rule) => rule.oneOf)
-    .oneOf.find(styleRuleByName("scss|sass", true));
+const getCracoJestContext = (callerCracoConfig, env) => {
+  const context = getCracoContext(callerCracoConfig, env);
+  const customResolve = (relativePath) =>
+    require.resolve(
+      path.join(callerCracoConfig.reactScriptsVersion, relativePath),
+      { paths: [projectRoot] }
+    );
+  return {
+    ...context,
+    resolve: customResolve,
+    rootDir: projectRoot,
+  };
 };
 
 const unknownLoader = path.join(
@@ -30,17 +40,17 @@ const unknownLoader = path.join(
   "index.js"
 );
 
-const addUnknownLoader = (webpackConfig) => {
-  const sassRule = obtainSassRule(webpackConfig);
-  const sassModuleRule = obtainSassModuleRule(webpackConfig);
-  sassRule.use.push(toLoaderRule(unknownLoader));
-  sassModuleRule.use.push(toLoaderRule(unknownLoader));
-};
+function addUnknownLoader(webpackConfig) {
+  const oneOfRule = obtainOneOfRule.call(this, webpackConfig);
+  const sassRule = obtainSassRule.call(this, oneOfRule);
+  const sassModuleRule = obtainSassModuleRule.call(this, oneOfRule);
+  sassRule.use.push(toLoaderRule.call(this, unknownLoader));
+  sassModuleRule.use.push(toLoaderRule.call(this, unknownLoader));
+}
 
 export {
-  getCracoContext,
-  obtainSassRule,
-  obtainSassModuleRule,
+  getCracoWebpackContext,
+  getCracoJestContext,
   unknownLoader,
   addUnknownLoader,
 };

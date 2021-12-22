@@ -1,5 +1,11 @@
-import { sep as pathSep } from "path";
-import { styleRuleByName, throwError, toLoaderRule } from "./utils";
+import {
+  obtainOneOfRule,
+  obtainSassModuleRule,
+  obtainSassRule,
+  throwError,
+  toLessLoaders,
+  toLoaderRule,
+} from "./utils";
 import { loaderByName } from "@craco/craco";
 import { cloneDeep } from "lodash";
 
@@ -9,100 +15,16 @@ const lessModuleRegex = /\.module\.less$/;
 const overrideWebpackConfig = ({
   context,
   webpackConfig,
-
-  pluginOptions: {
-    styleLoaderOptions,
-    miniCssExtractPluginOptions,
-    cssLoaderOptions,
-    postcssLoaderOptions,
-    resolveUrlLoaderOptions,
-    lessLoaderOptions,
-
-    modifyLessRule,
-    modifyLessModuleRule,
-
-    unknownLoader = "error",
-  } = {},
+  pluginOptions = {},
 }) => {
-  const isEnvDevelopment = context.env === "development";
-  const isEnvProduction = context.env === "production";
+  const { modifyLessRule, modifyLessModuleRule } = pluginOptions;
 
   const createLessRule = ({ baseRule, overrideRule }) => {
     baseRule = cloneDeep(baseRule);
 
     const loaders = baseRule.use
-      .map(toLoaderRule)
-      .map((rule) => {
-        if (
-          isEnvDevelopment &&
-          rule.loader.includes(`${pathSep}style-loader${pathSep}`)
-        ) {
-          return {
-            loader: rule.loader,
-            options: {
-              ...rule.options,
-              ...styleLoaderOptions,
-            },
-          };
-        } else if (
-          isEnvProduction &&
-          rule.loader.includes(`${pathSep}mini-css-extract-plugin${pathSep}`)
-        ) {
-          return {
-            loader: rule.loader,
-            options: {
-              ...rule.options,
-              ...miniCssExtractPluginOptions,
-            },
-          };
-        } else if (rule.loader.includes(`${pathSep}css-loader${pathSep}`)) {
-          return {
-            loader: rule.loader,
-            options: {
-              ...rule.options,
-              ...cssLoaderOptions,
-            },
-          };
-        } else if (rule.loader.includes(`${pathSep}postcss-loader${pathSep}`)) {
-          return {
-            loader: rule.loader,
-            options: {
-              ...rule.options,
-              ...postcssLoaderOptions,
-            },
-          };
-        } else if (
-          rule.loader.includes(`${pathSep}resolve-url-loader${pathSep}`)
-        ) {
-          return {
-            loader: rule.loader,
-            options: {
-              ...rule.options,
-              ...resolveUrlLoaderOptions,
-            },
-          };
-        } else if (rule.loader.includes(`${pathSep}sass-loader${pathSep}`)) {
-          return {
-            loader: require.resolve("less-loader"),
-            options: {
-              ...rule.options,
-              ...lessLoaderOptions,
-            },
-          };
-        } else {
-          switch (unknownLoader) {
-            case "accept":
-              return rule;
-            case "ignore":
-              return null;
-            case "error":
-              throwError(
-                `Found an unhandled loader in the ${context.env} webpack config: ${rule.loader}`,
-                "webpack+unknown+rule"
-              );
-          }
-        }
-      })
+      .map(toLoaderRule.bind(context))
+      .map(toLessLoaders.bind(context, pluginOptions))
       .filter(Boolean);
 
     return {
@@ -112,23 +34,10 @@ const overrideWebpackConfig = ({
     };
   };
 
-  const oneOfRule = webpackConfig.module.rules.find((rule) => rule.oneOf);
-  if (!oneOfRule) {
-    throwError(
-      "Can't find a 'oneOf' rule under module.rules in the " +
-        `${context.env} webpack config!`,
-      "webpack+rules+oneOf"
-    );
-  }
+  const oneOfRule = obtainOneOfRule.call(context, webpackConfig);
 
-  const sassRule = oneOfRule.oneOf.find(styleRuleByName("scss|sass", false));
-  if (!sassRule) {
-    throwError(
-      "Can't find the webpack rule to match scss/sass files in the " +
-        `${context.env} webpack config!`,
-      "webpack+rules+scss+sass"
-    );
-  }
+  const sassRule = obtainSassRule.call(context, oneOfRule);
+
   let lessRule = createLessRule({
     baseRule: sassRule,
     overrideRule: {
@@ -141,16 +50,8 @@ const overrideWebpackConfig = ({
     lessRule = modifyLessRule(lessRule, context);
   }
 
-  const sassModuleRule = oneOfRule.oneOf.find(
-    styleRuleByName("scss|sass", true)
-  );
-  if (!sassModuleRule) {
-    throwError(
-      "Can't find the webpack rule to match scss/sass module files in the " +
-        `${context.env} webpack config!`,
-      "webpack+rules+scss+sass"
-    );
-  }
+  const sassModuleRule = obtainSassModuleRule.call(context, oneOfRule);
+
   let lessModuleRule = createLessRule({
     baseRule: sassModuleRule,
     overrideRule: {

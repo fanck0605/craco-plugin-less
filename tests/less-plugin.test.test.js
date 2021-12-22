@@ -2,7 +2,7 @@ import { createJestConfig } from "@craco/craco";
 import { processCracoConfig } from "@craco/craco/lib/config";
 import { applyJestConfigPlugins } from "@craco/craco/lib/features/plugins";
 import lessPlugin from "../src/less-plugin";
-import { getCracoContext } from "./test-utils";
+import { getCracoJestContext } from "./test-utils";
 import { cloneDeep } from "lodash";
 
 process.env.NODE_ENV = "test";
@@ -10,7 +10,7 @@ process.env.NODE_ENV = "test";
 const contexts = ["react-scripts-v4", "react-scripts-v5"].map(
   (reactScriptsVersion) => {
     const baseCracoConfig = { reactScriptsVersion };
-    const cracoContext = getCracoContext(baseCracoConfig);
+    const cracoContext = getCracoJestContext(baseCracoConfig);
     const originalJestConfig = createJestConfig(baseCracoConfig);
 
     const overrideJestConfig = (callerCracoConfig, jestConfig) => {

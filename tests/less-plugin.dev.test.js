@@ -1,11 +1,14 @@
 import lessPlugin from "../src/less-plugin";
 import { applyWebpackConfigPlugins } from "@craco/craco/lib/features/plugins";
-import { styleRuleByName } from "../src/utils";
 import {
-  addUnknownLoader,
-  getCracoContext,
+  obtainOneOfRule,
   obtainSassModuleRule,
   obtainSassRule,
+  styleRuleByName,
+} from "../src/utils";
+import {
+  addUnknownLoader,
+  getCracoWebpackContext,
   unknownLoader,
 } from "./test-utils";
 import { createWebpackDevConfig } from "@craco/craco";
@@ -17,11 +20,21 @@ process.env.NODE_ENV = "development";
 const contexts = ["react-scripts-v4", "react-scripts-v5"].map(
   (reactScriptsVersion) => {
     const baseCracoConfig = { reactScriptsVersion };
-    const cracoContext = getCracoContext(baseCracoConfig);
+    const cracoContext = getCracoWebpackContext(baseCracoConfig);
     const originalWebpackConfig = createWebpackDevConfig(baseCracoConfig);
 
-    const originalSassRule = obtainSassRule(originalWebpackConfig);
-    const originalSassModuleRule = obtainSassModuleRule(originalWebpackConfig);
+    const originalOneOfRule = obtainOneOfRule.call(
+      cracoContext,
+      originalWebpackConfig
+    );
+    const originalSassRule = obtainSassRule.call(
+      cracoContext,
+      originalOneOfRule
+    );
+    const originalSassModuleRule = obtainSassModuleRule.call(
+      cracoContext,
+      originalOneOfRule
+    );
 
     const overrideWebpackConfig = (callerCracoConfig, webpackConfig) => {
       return applyWebpackConfigPlugins(
@@ -647,12 +660,13 @@ test("the webpack config is modified correctly with the modifyLessModuleRule opt
 test("the webpack config is modified correctly when less plugin accept an unknown loader", () => {
   contexts.forEach(
     ({
+      cracoContext,
       webpackConfig,
       originalSassRule,
       originalSassModuleRule,
       overrideWebpackConfig,
     }) => {
-      addUnknownLoader(webpackConfig);
+      addUnknownLoader.call(cracoContext, webpackConfig);
 
       webpackConfig = overrideWebpackConfig(
         {
@@ -708,7 +722,6 @@ test("the webpack config is modified correctly when less plugin accept an unknow
 
       expect(lessRule.use[5]).toEqual({
         loader: unknownLoader,
-        options: {},
       });
 
       const lessModuleRule = oneOfRule.oneOf.find(
@@ -748,7 +761,6 @@ test("the webpack config is modified correctly when less plugin accept an unknow
 
       expect(lessModuleRule.use[5]).toEqual({
         loader: unknownLoader,
-        options: {},
       });
     }
   );
@@ -757,12 +769,13 @@ test("the webpack config is modified correctly when less plugin accept an unknow
 test("the webpack config is modified correctly when less plugin ignore an unknown loader", () => {
   contexts.forEach(
     ({
+      cracoContext,
       webpackConfig,
       originalSassRule,
       originalSassModuleRule,
       overrideWebpackConfig,
     }) => {
-      addUnknownLoader(webpackConfig);
+      addUnknownLoader.call(cracoContext, webpackConfig);
 
       webpackConfig = overrideWebpackConfig(
         {
@@ -902,8 +915,8 @@ test("throws an error when we can't find the oneOf rules in the webpack config",
 });
 
 test("throws an error when react-scripts adds an unknown webpack rule", () => {
-  contexts.forEach(({ webpackConfig, overrideWebpackConfig }) => {
-    addUnknownLoader(webpackConfig);
+  contexts.forEach(({ cracoContext, webpackConfig, overrideWebpackConfig }) => {
+    addUnknownLoader.call(cracoContext, webpackConfig);
 
     const runTest = () => {
       webpackConfig = overrideWebpackConfig(
