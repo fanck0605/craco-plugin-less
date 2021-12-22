@@ -1,7 +1,20 @@
+import type { CracoWebpackContext } from "@craco/craco";
 import { loaderByName, throwUnexpectedConfigError } from "@craco/craco";
-import { isString } from "lodash";
+import { isFunction, isString } from "lodash";
+import type { Configuration, RuleSetRule, RuleSetUseItem } from "webpack";
+import type { LessPluginOptions } from "./less-plugin";
 
-const throwError = (message, githubIssueQuery) =>
+interface LoaderRule {
+  ident?: string;
+  loader?: string;
+  options?: { [index: string]: any };
+}
+
+interface OneOfRule extends RuleSetRule {
+  oneOf: RuleSetRule[];
+}
+
+const throwError = (message: string, githubIssueQuery?: string) =>
   throwUnexpectedConfigError({
     message,
     packageName: "craco-plugin-less",
@@ -9,8 +22,8 @@ const throwError = (message, githubIssueQuery) =>
     githubIssueQuery,
   });
 
-const styleRuleByName = (name, isModule) => {
-  return (rule) => {
+const styleRuleByName = (name: string, isModule: boolean) => {
+  return (rule: RuleSetRule): boolean => {
     if (rule.test) {
       const test = rule.test.toString();
 
@@ -26,32 +39,60 @@ const styleRuleByName = (name, isModule) => {
   };
 };
 
-function toLoaderRule(useItem) {
+function toLoaderRule(
+  this: CracoWebpackContext,
+  useItem: RuleSetUseItem
+): LoaderRule {
   if (isString(useItem)) {
     return {
       loader: useItem,
     };
-  } else {
-    return useItem;
   }
+
+  if (!isFunction(useItem) && !isString(useItem.options)) {
+    return {
+      ...useItem,
+      options: useItem.options,
+    };
+  }
+
+  return throwError(
+    `Unexpected RuleSetUseItem type in the ${this.env} webpack config!`,
+    "webpack+loader+rule"
+  );
 }
 
-function obtainOneOfRule(webpackConfig) {
-  const oneOfRule = webpackConfig.module.rules.find((rule) => rule.oneOf);
+function obtainOneOfRule(
+  this: CracoWebpackContext,
+  webpackConfig: Configuration
+): OneOfRule {
+  const oneOfRule = webpackConfig.module?.rules?.find(
+    (rule) => !isString(rule) && rule.oneOf
+  );
   if (!oneOfRule) {
-    throwError(
+    return throwError(
       `Can't find a 'oneOf' rule under module.rules in the ${this.env} webpack config!`,
       "webpack+rules+oneOf"
     );
   }
+  // automatic type conversion
+  if (isString(oneOfRule) || !oneOfRule.oneOf) {
+    throw Error("unreachable");
+  }
 
-  return oneOfRule;
+  return {
+    ...oneOfRule,
+    oneOf: oneOfRule.oneOf,
+  };
 }
 
-function obtainSassRule(oneOfRule) {
+function obtainSassRule(
+  this: CracoWebpackContext,
+  oneOfRule: OneOfRule
+): RuleSetRule {
   const sassRule = oneOfRule.oneOf.find(styleRuleByName("scss|sass", false));
   if (!sassRule) {
-    throwError(
+    return throwError(
       `Can't find the webpack rule to match scss/sass files in the ${this.env} webpack config!`,
       "webpack+rules+scss+sass"
     );
@@ -60,14 +101,17 @@ function obtainSassRule(oneOfRule) {
   return sassRule;
 }
 
-function obtainSassModuleRule(oneOfRule) {
+function obtainSassModuleRule(
+  this: CracoWebpackContext,
+  oneOfRule: OneOfRule
+): RuleSetRule {
   const sassModuleRule = oneOfRule.oneOf.find(
     styleRuleByName("scss|sass", true)
   );
   if (!sassModuleRule) {
-    throwError(
+    return throwError(
       `Can't find the webpack rule to match scss/sass module files in the ${this.env} webpack config!`,
-      "webpack+rules+scss+sass"
+      "webpack+rules+scss+sass+module"
     );
   }
 
@@ -87,6 +131,7 @@ const matchesResolveUrlLoader = loaderByName("resolve-url-loader");
 const matchesSassLoader = loaderByName("sass-loader");
 
 function toLessLoaders(
+  this: CracoWebpackContext,
   {
     styleLoaderOptions,
     miniCssExtractPluginOptions,
@@ -95,9 +140,9 @@ function toLessLoaders(
     resolveUrlLoaderOptions,
     lessLoaderOptions,
     unknownLoader = "error",
-  },
-  loaderRule
-) {
+  }: LessPluginOptions,
+  loaderRule: LoaderRule
+): LoaderRule | null {
   const isEnvDevelopment = this.env === "development";
   const isEnvProduction = this.env === "production";
 
@@ -156,13 +201,15 @@ function toLessLoaders(
       case "ignore":
         return null;
       case "error":
-        throwError(
+        return throwError(
           `Found an unhandled loader in the ${this.env} webpack config: ${loaderRule.loader}`,
           "webpack+unknown+rule"
         );
     }
   }
 }
+
+export type { LoaderRule, OneOfRule };
 
 export {
   throwError,

@@ -2,6 +2,7 @@
 .idea
 .vscode
 coverage
+generate
 lib
 node_modules
 npm-debug.log*

@@ -1,3 +1,4 @@
+import type { LoaderRule } from "./utils";
 import {
   obtainOneOfRule,
   obtainSassModuleRule,
@@ -6,26 +7,63 @@ import {
   toLessLoaders,
   toLoaderRule,
 } from "./utils";
+import type {
+  CracoWebpackContext,
+  OverrideJestConfigFunc,
+  OverrideWebpackConfigFunc,
+} from "@craco/craco";
 import { loaderByName } from "@craco/craco";
-import { cloneDeep } from "lodash";
+import { cloneDeep, isArray } from "lodash";
+import type { RuleSetRule } from "webpack";
+
+type ModifyLessRuleFunc = (
+  lessRule: RuleSetRule,
+  cracoContext: CracoWebpackContext
+) => RuleSetRule;
+
+interface LessPluginOptions {
+  styleLoaderOptions?: { [key: string]: any };
+  miniCssExtractPluginOptions?: { [key: string]: any };
+  cssLoaderOptions?: { [key: string]: any };
+  postcssLoaderOptions?: { [key: string]: any };
+  resolveUrlLoaderOptions?: { [key: string]: any };
+  lessLoaderOptions?: { [key: string]: any };
+
+  modifyLessRule?: ModifyLessRuleFunc;
+  modifyLessModuleRule?: ModifyLessRuleFunc;
+
+  unknownLoader?: "accept" | "ignore" | "error";
+}
+
+type CreateLessRuleFunc = (props: {
+  baseRule: RuleSetRule;
+  overrideRule: RuleSetRule;
+}) => RuleSetRule;
 
 const lessRegex = /\.less$/;
 const lessModuleRegex = /\.module\.less$/;
 
-const overrideWebpackConfig = ({
+const overrideWebpackConfig: OverrideWebpackConfigFunc = ({
   context,
   webpackConfig,
   pluginOptions = {},
 }) => {
-  const { modifyLessRule, modifyLessModuleRule } = pluginOptions;
+  const { modifyLessRule, modifyLessModuleRule } =
+    pluginOptions as LessPluginOptions;
 
-  const createLessRule = ({ baseRule, overrideRule }) => {
+  const createLessRule: CreateLessRuleFunc = ({ baseRule, overrideRule }) => {
     baseRule = cloneDeep(baseRule);
+    if (!isArray(baseRule.use)) {
+      return throwError(
+        `Unexpected 'use' type under style rule in the ${context.env} webpack config`,
+        "webpack+rule+use"
+      );
+    }
 
     const loaders = baseRule.use
       .map(toLoaderRule.bind(context))
       .map(toLessLoaders.bind(context, pluginOptions))
-      .filter(Boolean);
+      .filter(Boolean) as LoaderRule[];
 
     return {
       ...baseRule,
@@ -85,14 +123,24 @@ const overrideWebpackConfig = ({
   return webpackConfig;
 };
 
-const overrideJestConfig = ({ context, jestConfig }) => {
+const overrideJestConfig: OverrideJestConfigFunc = ({
+  context,
+  jestConfig,
+}) => {
   const moduleNameMapper = jestConfig.moduleNameMapper;
+  if (!moduleNameMapper) {
+    return throwError(
+      `Can't find moduleNameMapper in the ${context.env} jest config!`,
+      "jest+moduleNameMapper"
+    );
+  }
+
   const cssModulesPattern = Object.keys(moduleNameMapper).find((p) =>
     p.match(/\\\.module\\\.\(.*?css.*?\)/)
   );
 
   if (!cssModulesPattern) {
-    throwError(
+    return throwError(
       `Can't find CSS Modules pattern under moduleNameMapper in the ${context.env} jest config!`,
       "jest+moduleNameMapper+css"
     );
@@ -103,11 +151,18 @@ const overrideJestConfig = ({ context, jestConfig }) => {
   delete moduleNameMapper[cssModulesPattern];
 
   const transformIgnorePatterns = jestConfig.transformIgnorePatterns;
+  if (!transformIgnorePatterns) {
+    return throwError(
+      `Can't find transformIgnorePatterns in the ${context.env} jest config!`,
+      "jest+transformIgnorePatterns"
+    );
+  }
+
   const cssModulesPatternIndex = transformIgnorePatterns.findIndex((p) =>
     p.match(/\\\.module\\\.\(.*?css.*?\)/)
   );
   if (cssModulesPatternIndex === -1) {
-    throwError(
+    return throwError(
       `Can't find CSS Modules pattern under transformIgnorePatterns in the ${context.env} jest config!`,
       "jest+transformIgnorePatterns+css"
     );
@@ -119,5 +174,7 @@ const overrideJestConfig = ({ context, jestConfig }) => {
 
   return jestConfig;
 };
+
+export type { ModifyLessRuleFunc, LessPluginOptions };
 
 export default Object.freeze({ overrideWebpackConfig, overrideJestConfig });

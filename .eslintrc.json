@@ -1,5 +1,12 @@
 {
   "parser": "@babel/eslint-parser",
   "plugins": ["@babel"],
-  "extends": ["plugin:prettier/recommended"]
+  "extends": ["plugin:prettier/recommended"],
+  "overrides": [
+    {
+      "files": ["**/*.ts"],
+      "parser": "@typescript-eslint/parser",
+      "plugins": ["@typescript-eslint"]
+    }
+  ]
 }

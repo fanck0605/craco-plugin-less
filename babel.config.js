@@ -11,4 +11,10 @@ module.exports = {
     ],
   ],
   comments: false,
+  overrides: [
+    {
+      test: ["**/*.ts"],
+      presets: ["@babel/preset-typescript"],
+    },
+  ],
 };

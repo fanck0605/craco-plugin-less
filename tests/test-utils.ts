@@ -8,19 +8,26 @@ import {
 } from "../src/utils";
 import path from "path";
 import { projectRoot } from "@craco/craco/lib/paths";
+import type { CracoConfig, CracoWebpackContext } from "@craco/craco";
+import type { Configuration, RuleSetUseItem } from "webpack";
 
-const getCracoContext = (callerCracoConfig, env = process.env.NODE_ENV) => {
+const getCracoContext = (
+  callerCracoConfig: CracoConfig,
+  env: string = process.env.NODE_ENV || "development"
+) => {
   const context = { env };
   const cracoConfig = processCracoConfig(callerCracoConfig, { env });
-  context.paths = getCraPaths(cracoConfig);
-  return context;
+  return {
+    ...context,
+    paths: getCraPaths(cracoConfig),
+  };
 };
 
 const getCracoWebpackContext = getCracoContext;
 
-const getCracoJestContext = (callerCracoConfig, env) => {
+const getCracoJestContext = (callerCracoConfig: CracoConfig, env?: string) => {
   const context = getCracoContext(callerCracoConfig, env);
-  const customResolve = (relativePath) =>
+  const customResolve = (relativePath: string) =>
     require.resolve(
       path.join(callerCracoConfig.reactScriptsVersion, relativePath),
       { paths: [projectRoot] }
@@ -40,12 +47,19 @@ const unknownLoader = path.join(
   "index.js"
 );
 
-function addUnknownLoader(webpackConfig) {
+function addUnknownLoader(
+  this: CracoWebpackContext,
+  webpackConfig: Configuration
+) {
   const oneOfRule = obtainOneOfRule.call(this, webpackConfig);
   const sassRule = obtainSassRule.call(this, oneOfRule);
   const sassModuleRule = obtainSassModuleRule.call(this, oneOfRule);
-  sassRule.use.push(toLoaderRule.call(this, unknownLoader));
-  sassModuleRule.use.push(toLoaderRule.call(this, unknownLoader));
+  (sassRule.use as RuleSetUseItem[]).push(
+    toLoaderRule.call(this, unknownLoader)
+  );
+  (sassModuleRule.use as RuleSetUseItem[]).push(
+    toLoaderRule.call(this, unknownLoader)
+  );
 }
 
 export {
