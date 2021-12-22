@@ -13,7 +13,7 @@ import type { Configuration, RuleSetUseItem } from "webpack";
 
 const getCracoContext = (
   callerCracoConfig: CracoConfig,
-  env: string = process.env.NODE_ENV || "development"
+  env: string = process.env.NODE_ENV ?? "development"
 ) => {
   const context = { env };
   const cracoConfig = processCracoConfig(callerCracoConfig, { env });
