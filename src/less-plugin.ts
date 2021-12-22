@@ -13,7 +13,7 @@ import type {
   OverrideWebpackConfigFunc,
 } from "@craco/craco";
 import { loaderByName } from "@craco/craco";
-import { cloneDeep, isArray } from "lodash";
+import { cloneDeep, isArray, isNull, negate } from "lodash";
 import type { RuleSetRule } from "webpack";
 
 type ModifyLessRuleFunc = (
@@ -63,7 +63,7 @@ const overrideWebpackConfig: OverrideWebpackConfigFunc = ({
     const loaders = baseRule.use
       .map(toLoaderRule.bind(context))
       .map(toLessLoaders.bind(context, pluginOptions))
-      .filter(Boolean) as LoaderRule[];
+      .filter(negate(isNull)) as LoaderRule[];
 
     return {
       ...baseRule,
