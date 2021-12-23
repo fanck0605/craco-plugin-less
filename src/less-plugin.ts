@@ -22,12 +22,12 @@ type ModifyLessRuleFunc = (
 ) => RuleSetRule;
 
 interface LessPluginOptions {
-  styleLoaderOptions?: { [key: string]: any };
-  miniCssExtractPluginOptions?: { [key: string]: any };
-  cssLoaderOptions?: { [key: string]: any };
-  postcssLoaderOptions?: { [key: string]: any };
-  resolveUrlLoaderOptions?: { [key: string]: any };
-  lessLoaderOptions?: { [key: string]: any };
+  styleLoaderOptions?: { [key: string]: unknown };
+  miniCssExtractPluginOptions?: { [key: string]: unknown };
+  cssLoaderOptions?: { [key: string]: unknown };
+  postcssLoaderOptions?: { [key: string]: unknown };
+  resolveUrlLoaderOptions?: { [key: string]: unknown };
+  lessLoaderOptions?: { [key: string]: unknown };
 
   modifyLessRule?: ModifyLessRuleFunc;
   modifyLessModuleRule?: ModifyLessRuleFunc;
@@ -43,13 +43,12 @@ type CreateLessRuleFunc = (props: {
 const lessRegex = /\.less$/;
 const lessModuleRegex = /\.module\.less$/;
 
-const overrideWebpackConfig: OverrideWebpackConfigFunc = ({
+const overrideWebpackConfig: OverrideWebpackConfigFunc<LessPluginOptions> = ({
   context,
   webpackConfig,
   pluginOptions = {},
 }) => {
-  const { modifyLessRule, modifyLessModuleRule } =
-    pluginOptions as LessPluginOptions;
+  const { modifyLessRule, modifyLessModuleRule } = pluginOptions;
 
   const createLessRule: CreateLessRuleFunc = ({ baseRule, overrideRule }) => {
     baseRule = cloneDeep(baseRule);
@@ -123,7 +122,7 @@ const overrideWebpackConfig: OverrideWebpackConfigFunc = ({
   return webpackConfig;
 };
 
-const overrideJestConfig: OverrideJestConfigFunc = ({
+const overrideJestConfig: OverrideJestConfigFunc<LessPluginOptions> = ({
   context,
   jestConfig,
 }) => {

@@ -1,12 +1,29 @@
 {
+  "env": {
+    "node": true
+  },
   "parser": "@babel/eslint-parser",
   "plugins": ["@babel"],
-  "extends": ["plugin:prettier/recommended"],
+  "extends": ["plugin:prettier/recommended", "eslint:recommended"],
   "overrides": [
     {
+      "files": ["tests/**/*"],
+      "env": {
+        "jest": true
+      }
+    },
+    {
       "files": ["**/*.ts"],
-      "parser": "@typescript-eslint/parser",
-      "plugins": ["@typescript-eslint"]
+      "extends": [
+        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-requiring-type-checking"
+      ],
+      "parserOptions": {
+        "project": ["tsconfig.json"]
+      },
+      "rules": {
+        "no-undef": "error"
+      }
     }
   ]
 }

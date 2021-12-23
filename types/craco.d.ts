@@ -3,7 +3,9 @@ declare module "@craco/craco" {
   import type { Configuration, RuleSetRule, RuleSetUseItem } from "webpack";
 
   export interface CracoConfig {
-    [key: string]: any;
+    reactScriptsVersion: string;
+
+    [key: string]: unknown;
   }
 
   export interface CracoOptions {
@@ -40,6 +42,7 @@ declare module "@craco/craco" {
     paths: CraPaths;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-empty-interface
   export interface CracoWebpackContext extends CracoContext {}
 
   export interface CracoJestContext extends CracoContext {
@@ -47,17 +50,17 @@ declare module "@craco/craco" {
     rootDir: string;
   }
 
-  export type OverrideWebpackConfigFunc = (props: {
+  export type OverrideWebpackConfigFunc<PluginOptions> = (props: {
     cracoConfig: CracoConfig;
     webpackConfig: Configuration;
-    pluginOptions?: any;
+    pluginOptions?: PluginOptions;
     context: CracoWebpackContext;
   }) => Configuration;
 
-  export type OverrideJestConfigFunc = (props: {
+  export type OverrideJestConfigFunc<PluginOptions> = (props: {
     cracoConfig: CracoConfig;
     jestConfig: Config.InitialOptions;
-    pluginOptions?: any;
+    pluginOptions?: PluginOptions;
     context: CracoJestContext;
   }) => Config.InitialOptions;
 

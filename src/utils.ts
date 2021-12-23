@@ -7,7 +7,7 @@ import type { LessPluginOptions } from "./less-plugin";
 interface LoaderRule {
   ident?: string;
   loader?: string;
-  options?: { [index: string]: any };
+  options?: { [index: string]: unknown };
 }
 
 interface OneOfRule extends RuleSetRule {
@@ -195,7 +195,9 @@ function toLessLoaders(
         return null;
       case "error":
         return throwError(
-          `Found an unhandled loader in the ${this.env} webpack config: ${loaderRule.loader}`,
+          `Found an unhandled loader in the ${this.env} webpack config: ${
+            loaderRule.loader ?? "unknown"
+          }`,
           "webpack+unknown+rule"
         );
     }
